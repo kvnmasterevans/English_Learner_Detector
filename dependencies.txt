@@ -1,0 +1,7 @@
+open-cv
+numpy
+fitz
+easyocr
+json
+nltk
+difflib
