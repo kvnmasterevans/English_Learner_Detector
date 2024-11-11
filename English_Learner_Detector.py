@@ -125,10 +125,10 @@ class_names = ["academic eld 1b", # English Learner
                 "Int. Math 3 L B",
                 "English1C L A P", # trans_redacted_5
                 "Academic ELD 3A",
-                "PLTW-PrinBioMA", # ??
+                # "PLTW-PrinBioMA", # ??
                 "English1C L B P",
                 "Academic ELD 3B",
-                "PLTW-PrinBioMB", # ??
+                # "PLTW-PrinBioMB", # ??
                 "Eng 2C L A P",
                 "Academic ELD 2A",
                 "Eng 2C L B P",
@@ -169,6 +169,7 @@ class_names = ["academic eld 1b", # English Learner
 
 def check_for_english_learner(rows):
     english_learner = False
+    matches = []
     for row in rows:
         current_row = ""
         for text in row["text"]:
@@ -181,5 +182,7 @@ def check_for_english_learner(rows):
                 # print(current_row)
                 # print("matching course:")
                 # print(class_title)
+                matches.append([current_row, class_title])
                 english_learner = True
-    return english_learner
+        
+    return english_learner, matches

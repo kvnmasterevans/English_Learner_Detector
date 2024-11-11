@@ -1,5 +1,6 @@
 # import libraries
 import os
+import csv
 import argparse
 import json
 from utils import standardize_image, removeText, removeTop, removeStateID, \
@@ -54,6 +55,27 @@ def process_image(filename, input_folder_path):
     result = run_ocr(standardized_png_path)
     OCR_Data_Path = convert_OCR_result_to_json(result, filename)
 
+    #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    # with open('output.csv', mode='w', newline='') as file:
+    #     writer = csv.writer(file)
+    # # Write header if desired
+    # writer.writerow(["Name", "IsTrue"])
+    
+    # for name, is_true in data:
+    #     # Write each row
+    #     writer.writerow([name, is_true])
+    #     # Flush to ensure data is written to disk
+    #     file.flush()
+
+
+
+
+
+
+
+
+    #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
     with open(OCR_Data_Path, 'r') as json_file:
         OCR_Data = json.load(json_file)
 
@@ -82,8 +104,8 @@ def process_image(filename, input_folder_path):
     for row in col3Rows:
         rows.append(row)
 
-    english_learner = check_for_english_learner(rows)
-
+    english_learner, matches = check_for_english_learner(rows)
+    
     print(f"english learner for {filename} = {english_learner}")
     # end column row stuff ^
 
@@ -95,7 +117,7 @@ def process_image(filename, input_folder_path):
 
     remove_temporary_files()
 
-    return redacted_image, english_learner
+    return redacted_image, english_learner, matches
 
 
 
@@ -105,11 +127,12 @@ def process_images_in_folder(folder_path):
     # scan in image
      # List all files in the folder
     
-    output_file_path = "output.txt"
-    
+    output_text_file_path = "text_output.txt"
+    output_csv_file_path = "csv_output.csv"
 
-    with open(output_file_path, "a") as file:
-        file.write("English Learner Statuses: \n\n")
+    with open(output_text_file_path, "w") as text_file, open(output_csv_file_path, mode='w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        text_file.write("English Learner Statuses: \n\n")
         for filename in os.listdir(folder_path):
             try:
                 print()
@@ -117,9 +140,21 @@ def process_images_in_folder(folder_path):
                 # Construct the full file path
                 file_path = os.path.join(folder_path, filename)
                 
-                _, eng_status = process_image(filename, folder_path)
-                file.write(f"{filename} = {eng_status}\n")
-                file.flush()
+                _, eng_status, matches = process_image(filename, folder_path)
+                # for match in matches:
+                #     print(match)
+                text_file.write(f"{filename} = {eng_status}\n")
+                if eng_status == True and matches:
+                    print(f"eng_status: {eng_status}")
+                    text_file.write("\t matches:\n")
+                    print("test spot...")
+                    for match in matches:
+                        print("match...")
+                        text_file.write(f"\t ocr row: {match[0]}, matching string: {match[1]}\n")
+                text_file.flush()
+                writer.writerow([filename, eng_status])
+                # Flush to ensure data is written to disk
+                csv_file.flush()
                 print(f"finished with {filename}")
                 
 
